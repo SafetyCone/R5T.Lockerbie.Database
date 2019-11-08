@@ -1,2 +1,2 @@
 # R5T.Lockerbie.Database
-A ILocalFileInfoRepository database implementation for the Lockerbie project.
+An ILocalFileInfoRepository database implementation for the Lockerbie project.
