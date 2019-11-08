@@ -1,4 +1,12 @@
 R5T.Lockerbie.Database - An ILocalFileInfoRepository database implementation for the Lockerbie project.
 
+Based on work in https://github.com/MinexAutomation/R5T.Dingwall.Database.Private.
+
 Goals
 
+
+Configuration
+
+Connection string is provided by the TConnectionStringProvider type selected when calling the R5T.Venetia.AddDatabaseContext<TDbContext, TConnectionStringProvider, TDatabaseContextOptionsBuilderConfigurator>() service collection extension method.
+
+That type can of course be a service!
