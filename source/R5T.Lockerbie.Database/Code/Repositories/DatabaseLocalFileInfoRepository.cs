@@ -32,21 +32,33 @@ namespace R5T.Lockerbie.Database
 
             var fileIdentity = new FileIdentity(guid);
 
+            var entity = new FileInfoEntity()
+            {
+                FileIdentity = fileIdentity.Value,
+                FilePath = filePath.Value,
+                FileFormat = fileFormat,
+            };
+
+            this.Add(entity);
+
+            return fileIdentity;
+        }
+
+        public void Add(FileInfo fileInfo)
+        {
+            var fileInfoEntity = fileInfo.ToEntityType();
+
+            this.Add(fileInfoEntity);
+        }
+
+        private void Add(FileInfoEntity fileInfoEntity)
+        {
             using (var dbContext = this.GetNewDbContext())
             {
-                var entity = new FileInfoEntity()
-                {
-                    FileIdentity = fileIdentity.Value,
-                    FilePath = filePath.Value,
-                    FileFormat = fileFormat,
-                };
-
-                dbContext.FileInfos.Add(entity);
+                dbContext.FileInfos.Add(fileInfoEntity);
 
                 dbContext.SaveChanges();
             }
-
-            return fileIdentity;
         }
 
         public void Delete(FileIdentity fileIdentity)
