@@ -10,7 +10,7 @@ namespace R5T.Lockerbie.Database
         public DbSet<Entities.FileInfo> FileInfos { get; set; }
 
 
-        public LocalFileInfoDbContext(DbContextOptions options)
+        public LocalFileInfoDbContext(DbContextOptions<LocalFileInfoDbContext> options)
             : base(options)
         {
         }
