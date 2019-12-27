@@ -7,6 +7,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\R5T.Lockerbie.Base\source\R5T.Lockerbie.Base\R5T.Lockerbie.Base.csproj" />
-    <ProjectReference Include="..\..\..\R5T.Venetia\source\R5T.Venetia\R5T.Venetia.csproj" />
+    <ProjectReference Include="..\..\..\R5T.Venetia.Extensions\source\R5T.Venetia.Extensions\R5T.Venetia.Extensions.csproj" />
   </ItemGroup>
 </Project>
