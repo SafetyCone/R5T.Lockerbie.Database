@@ -13,17 +13,12 @@ using FileInfoEntity = R5T.Lockerbie.Database.Entities.FileInfo;
 
 namespace R5T.Lockerbie.Database
 {
-    public class DatabaseLocalFileInfoRepository : DatabaseRepositoryBase<LocalFileInfoDbContext>, ILocalFileInfoRepository
+    public class DatabaseLocalFileInfoRepository<TDbContext> : ProvidedDatabaseRepositoryBase<TDbContext>, ILocalFileInfoRepository
+        where TDbContext: DbContext, ILocalFileInfoDbContext
     {
-        public DatabaseLocalFileInfoRepository(DbContextOptions<LocalFileInfoDbContext> dbContextOptions)
-            : base(dbContextOptions)
+        public DatabaseLocalFileInfoRepository(DbContextOptions<TDbContext> dbContextOptions, IDbContextProvider<TDbContext> dbContextProvider)
+            : base(dbContextOptions, dbContextProvider)
         {
-        }
-
-        public override LocalFileInfoDbContext GetNewDbContext()
-        {
-            var context = new LocalFileInfoDbContext(this.DbContextOptions);
-            return context;
         }
 
         public FileIdentity Add(FilePath filePath, FileFormat fileFormat)
