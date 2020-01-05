@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -21,7 +22,7 @@ namespace R5T.Lockerbie.Database
         {
         }
 
-        public FileIdentity Add(FilePath filePath, FileFormat fileFormat)
+        public async Task<FileIdentity> Add(FilePath filePath, FileFormat fileFormat)
         {
             var guid = Guid.NewGuid();
 
@@ -34,171 +35,191 @@ namespace R5T.Lockerbie.Database
                 FileFormat = fileFormat,
             };
 
-            this.Add(entity);
+            await this.Add(entity);
 
             return fileIdentity;
         }
 
-        public void Add(FileInfo fileInfo)
+        public async Task Add(FileInfo fileInfo)
         {
             var fileInfoEntity = fileInfo.ToEntityType();
 
-            this.Add(fileInfoEntity);
+            await this.Add(fileInfoEntity);
         }
 
-        private void Add(FileInfoEntity fileInfoEntity)
+        private async Task Add(FileInfoEntity fileInfoEntity)
         {
-            using (var dbContext = this.GetNewDbContext())
+            await this.ExecuteInContextAsync(async dbContext =>
             {
-                dbContext.FileInfos.Add(fileInfoEntity);
+                dbContext.Add(fileInfoEntity);
 
-                dbContext.SaveChanges();
-            }
+                await dbContext.SaveChangesAsync();
+            });
         }
 
-        public void Delete(FileIdentity fileIdentity)
+        public async Task Delete(FileIdentity fileIdentity)
         {
-            using (var dbContext = this.GetNewDbContext())
+            await this.ExecuteInContextAsync(async dbContext =>
             {
-                var entity = dbContext.FileInfos.Where(x => x.FileIdentity == fileIdentity.Value).Single();
+                var entity = await dbContext.FileInfos.Where(x => x.FileIdentity == fileIdentity.Value).SingleAsync();
 
                 dbContext.Remove(entity);
 
-                dbContext.SaveChanges();
-            }
+                await dbContext.SaveChangesAsync();
+            });
         }
 
-        public void Delete(FilePath filePath)
+        public async Task Delete(FilePath filePath)
         {
-            using (var dbContext = this.GetNewDbContext())
+            await this.ExecuteInContextAsync(async dbContext =>
             {
-                var entity = dbContext.FileInfos.Where(x => x.FilePath == filePath.Value).Single();
+                var entity = await dbContext.FileInfos.Where(x => x.FilePath == filePath.Value).SingleAsync();
 
                 dbContext.Remove(entity);
 
-                dbContext.SaveChanges();
-            }
+                await dbContext.SaveChangesAsync();
+            });
         }
 
-        public bool Exists(FileIdentity fileIdentity)
+        public async Task<bool> Exists(FileIdentity fileIdentity)
         {
-            using (var dbContext = this.GetNewDbContext())
+            var exists = await this.ExecuteInContextAsync(async dbContext =>
             {
-                var entityOrDefault = dbContext.FileInfos.Where(x => x.FileIdentity == fileIdentity.Value).SingleOrDefault();
+                var entityOrDefault = await dbContext.FileInfos.Where(x => x.FileIdentity == fileIdentity.Value).SingleOrDefaultAsync();
 
                 var output = entityOrDefault == default;
                 return output;
-            }
+            });
+
+            return exists;
         }
 
-        public bool Exists(FilePath filePath)
+        public async Task<bool> Exists(FilePath filePath)
         {
-            using (var dbContext = this.GetNewDbContext())
+            var exists = await this.ExecuteInContextAsync(async dbContext =>
             {
-                var entityOrDefault = dbContext.FileInfos.Where(x => x.FilePath == filePath.Value).SingleOrDefault();
+                var entityOrDefault = await dbContext.FileInfos.Where(x => x.FilePath == filePath.Value).SingleOrDefaultAsync();
 
                 var output = entityOrDefault == default;
                 return output;
-            }
+            });
+
+            return exists;
         }
 
-        public IEnumerable<FileInfo> GetAll()
+        public async Task<IEnumerable<FileInfo>> GetAll()
         {
-            using (var dbContext = this.GetNewDbContext())
+            var fileInfos = await this.ExecuteInContextAsync(async dbContext =>
             {
-                var output = dbContext.FileInfos.Select(x => x.ToAppType()).ToList(); // Query now since DB context will get disposed.
+                var fileInfoEntities = await dbContext.FileInfos.ToListAsync(); // Query now since DB context will get disposed.
+
+                var output = fileInfoEntities.Select(x => x.ToAppType());
                 return output;
-            }
+            });
+
+            return fileInfos;
         }
 
-        public FileFormat GetFileFormat(FileIdentity fileIdentity)
+        public async Task<FileFormat> GetFileFormat(FileIdentity fileIdentity)
         {
-            using (var dbContext = this.GetNewDbContext())
+            var fileFormat = await this.ExecuteInContextAsync(async dbContext =>
             {
-                var entity = dbContext.FileInfos.Where(x => x.FileIdentity == fileIdentity.Value).Single();
+                var entity = await dbContext.FileInfos.Where(x => x.FileIdentity == fileIdentity.Value).SingleAsync();
 
                 var output = entity.FileFormat;
                 return output;
-            }
+            });
+
+            return fileFormat;
         }
 
-        public FileFormat GetFileFormat(FilePath filePath)
+        public async Task<FileFormat> GetFileFormat(FilePath filePath)
         {
-            using (var dbContext = this.GetNewDbContext())
+            var fileFormat = await this.ExecuteInContextAsync(async dbContext =>
             {
-                var entity = dbContext.FileInfos.Where(x => x.FilePath == filePath.Value).Single();
+                var entity = await dbContext.FileInfos.Where(x => x.FilePath == filePath.Value).SingleAsync();
 
                 var output = entity.FileFormat;
                 return output;
-            }
+            });
+
+            return fileFormat;
         }
 
-        public FileIdentity GetFileIdentity(FilePath filePath)
+        public async Task<FileIdentity> GetFileIdentity(FilePath filePath)
         {
-            using (var dbContext = this.GetNewDbContext())
+            var fileIdentity = await this.ExecuteInContextAsync(async dbContext =>
             {
-                var entity = dbContext.FileInfos.Where(x => x.FilePath == filePath.Value).Single();
+                var entity = await dbContext.FileInfos.Where(x => x.FilePath == filePath.Value).SingleAsync();
 
                 var output = new FileIdentity(entity.FileIdentity);
                 return output;
-            }
+            });
+
+            return fileIdentity;
         }
 
-        public FileInfo GetFileInfo(FileIdentity fileIdentity)
+        public async Task<FileInfo> GetFileInfo(FileIdentity fileIdentity)
         {
-            using (var dbContext = this.GetNewDbContext())
+            var fileInfo = await this.ExecuteInContextAsync(async dbContext =>
             {
-                var entity = dbContext.FileInfos.Where(x => x.FileIdentity == fileIdentity.Value).Single();
+                var entity = await dbContext.FileInfos.Where(x => x.FileIdentity == fileIdentity.Value).SingleAsync();
 
                 var output = entity.ToAppType();
                 return output;
-            }
+            });
+
+            return fileInfo;
         }
 
-        public FileInfo GetFileInfo(FilePath filePath)
+        public async Task<FileInfo> GetFileInfo(FilePath filePath)
         {
-            using (var dbContext = this.GetNewDbContext())
+            var fileInfo = await this.ExecuteInContextAsync(async dbContext =>
             {
-                var entity = dbContext.FileInfos.Where(x => x.FilePath == filePath.Value).Single();
+                var entity = await dbContext.FileInfos.Where(x => x.FilePath == filePath.Value).SingleAsync();
 
                 var output = entity.ToAppType();
                 return output;
-            }
+            });
+
+            return fileInfo;
         }
 
-        public FilePath GetFilePath(FileIdentity fileIdentity)
+        public async Task<FilePath> GetFilePath(FileIdentity fileIdentity)
         {
-            using (var dbContext = this.GetNewDbContext())
+            var filePath = await this.ExecuteInContextAsync(async dbContext =>
             {
-                var entity = dbContext.FileInfos.Where(x => x.FileIdentity == fileIdentity.Value).Single();
+                var entity = await dbContext.FileInfos.Where(x => x.FileIdentity == fileIdentity.Value).SingleAsync();
 
                 var output = new FilePath(entity.FilePath);
                 return output;
-            }
+            });
+
+            return filePath;
         }
 
-        public void SetFileFormat(FileIdentity fileIdentity, FileFormat fileFormat)
+        public async Task SetFileFormat(FileIdentity fileIdentity, FileFormat fileFormat)
         {
-            using (var dbContext = this.GetNewDbContext())
+            await this.ExecuteInContextAsync(async dbContext =>
             {
-                var entity = dbContext.FileInfos.Where(x => x.FileIdentity == fileIdentity.Value).Single();
+                var entity = await dbContext.FileInfos.Where(x => x.FileIdentity == fileIdentity.Value).SingleAsync();
 
                 entity.FileFormat = fileFormat;
 
-                dbContext.SaveChanges();
-            }
+                await dbContext.SaveChangesAsync();
+            });
         }
 
-        public void SetFileFormat(FilePath filePath, FileFormat fileFormat)
+        public async Task SetFileFormat(FilePath filePath, FileFormat fileFormat)
         {
-            using (var dbContext = this.GetNewDbContext())
+            await this.ExecuteInContextAsync(async dbContext =>
             {
-                var entity = dbContext.FileInfos.Where(x => x.FilePath == filePath.Value).Single();
+                var entity = await dbContext.FileInfos.Where(x => x.FilePath == filePath.Value).SingleAsync();
 
                 entity.FileFormat = fileFormat;
 
-                dbContext.SaveChanges();
-            }
+                await dbContext.SaveChangesAsync();
+            });
         }
     }
 }
